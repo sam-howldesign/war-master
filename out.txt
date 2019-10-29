@@ -1,0 +1,6 @@
+stdClass Object
+(
+    [userId] => U6f73e309048616c04b001536c9e6aa05
+    [displayName] => Sjyeppers
+    [pictureUrl] => http://dl.profile.line-cdn.net/0hkinaXxpGNEZTGBtRpfhLEW9dOiskNjIOK31-KXMcbX99KycWbH17IHcYYiN_fXEYbCx7JCMdPSR3
+)
