@@ -34,28 +34,29 @@
  
 
 include('./champs.php');
-include('./defense-order.php');
-//error_log(print_r($champs, true));
+include('./defense-order.php'); 
 
-
+//handy class for communicating with LINE, built by LINE
 require_once('./LINEBotTiny.php');
-require_once('./channelinfo.php');
+
+//This isn't in git, you'll have to get your own accesstoken and secret
+require_once('./channelinfo.php'); 
 $channelAccessToken = $channelInfo['channelAccessToken'];
 $channelSecret = $channelInfo['channelSecret'];
+
+//new client bot
 $client = new LINEBotTiny($channelAccessToken, $channelSecret);
 foreach ($client->parseEvents() as $event) {
+    //we should only ever get "message" events
     switch ($event['type']) {
         case 'message':
-            //error_log(print_r($event, true));
             $lineid = $event["source"]['userId'];
-            
-            //file_put_contents("./out.txt",print_r(json_decode($userinfo), true));
-
             $message = $event['message'];
             switch ($message['type']) {
                 case 'text':
 
                     $replyText = processMessage($lineid, $message['text']);
+
                     $client->replyMessage(array(
                         'replyToken' => $event['replyToken'],
                         'messages' => array(
@@ -77,6 +78,18 @@ foreach ($client->parseEvents() as $event) {
     }
 };
 
+/**
+ * Store information or return data on the state of the defenders.
+ * 
+ * defense, War Machine, 4*, 4, 40, 20 - adds a defender
+ * remove, War Machine - removes a defender
+ * show - shows all your defenders
+ * ? or help or commands - displays help info
+ * bg2 - change to battlegroup 2
+ * 
+ * @param String lineid - user's LINE id
+ * @param String input - the text that the user sent
+ */
 function processMessage($lineid, $input){
     $retText = '';
     //if it starts with "defense"
@@ -94,28 +107,28 @@ function processMessage($lineid, $input){
             //strip down the name, verify it is legit
             $name = preg_replace("/[^a-z0-9]/", '', strtolower($name));
             if (array_key_exists($name, $champs)){
-                //$retText .= "You are adding {$champs[$name]}\n";
+                //champ is legit
             }else {
                 $retText .= "I'm sorry I don't know who $name {$commandArray[1]} is.\n";
                 $notEnoughInformation = true;
             }
             $stars = intval($commandArray[2]);
             if ($stars > 0){
-                //$retText .= "$stars star\n";
+                //star rating is legit
             }else {
                 $retText .= "Please include a number of stars.\n";
                 $notEnoughInformation = true;
             }
             $rank = intval($commandArray[3]);
             if ($rank > 0){
-                //$retText .= "Rank $rank\n";
+                //rank is legit
             }else {
                 $retText .= "Please include a rank.\n";
                 $notEnoughInformation = true;
             }
             $level = intval($commandArray[4]);
             if ($level > 0){
-                //$retText .= "Level $level\n";
+                //level is legit
             }else {
                 $retText .= "Please include a level.\n";
                 $notEnoughInformation = true;
@@ -150,7 +163,7 @@ function processMessage($lineid, $input){
         //strip down the name, verify it is legit
         $name = preg_replace("/[^a-z0-9]/", '', strtolower($name));
         if (array_key_exists($name, $champs)){
-            //$retText .= "You are adding {$champs[$name]}\n";
+            //champ is legit
         }else {
             $retText .= "I'm sorry I don't know who $name {$commandArray[1]} is.\n";
             $notEnoughInformation = true;
@@ -194,6 +207,7 @@ function processMessage($lineid, $input){
 
         
     }elseif ( preg_match('/show/i',$commandArray[0]) ){
+        //Show all champs that you have uploaded
         $mysqli = new mysqli("localhost", "warmaster", "warmaster", "warmaster");
         if ($mysqli->connect_errno){
             $retText .= "Problems hitting the DB, please let an officer know.";
@@ -238,6 +252,14 @@ function processMessage($lineid, $input){
     return $retText;
 }
 
+/**
+ * Grabs the best 5 defenders in your group if diversity is false
+ * otherwise grabs the best 5 defenders for each member in a battlegroup 
+ * considering diversity
+ * 
+ * @param String lineid - the user's line id
+ * @param Boolean DIVERSITY - true if we need to respect diversity
+ */
 function calculateDefenders($lineid, $DIVERSITY){
     $retText = "";
     //for this users bg, show what everyone has entered
@@ -316,6 +338,12 @@ function calculateDefenders($lineid, $DIVERSITY){
     return $retText;
 }
 
+/**
+ * Determines the challenger rating for a particular champ
+ * 
+ * @param Int stars - star rating of champ
+ * @param Int rank - rank of the champ
+ */
 function calculateChallengerRating($stars, $rank){
     $challengerRating = 0;
         //6* 2/35  
@@ -380,6 +408,11 @@ function calculateChallengerRating($stars, $rank){
     return $challengerRating;
 }
 
+/**
+ * Sort the champs according to challenger rating then 
+ * star rating, then level, then sig level
+ * 
+ */
 function diversitySort($a, $b) {
     global $best_defenders;
 

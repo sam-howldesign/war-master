@@ -1,4 +1,7 @@
 <?php
+/**
+ * This is a list of the champs indexed by their more common names in the community.
+ */
     $champs['iceman'] = 'Iceman';
     $champs['icey'] = 'Iceman';
     $champs['aa'] = 'Archangel';

@@ -1,4 +1,10 @@
 <?php
+/**
+ * This is a list of champs ordered by their value as a defender.
+ * This list is pulled from Seatin's defender list.
+ * 
+ */
+    $best_defenders['Korg'] = 34;
     $best_defenders['Dormammu'] = 33;
     $best_defenders['Mephisto'] = 32;
     $best_defenders['Magik'] = 31;
